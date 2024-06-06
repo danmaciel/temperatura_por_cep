@@ -18,33 +18,22 @@ func TemperatureHandle(w http.ResponseWriter, r *http.Request) {
 
 	cepRules := rules.NewCepRules(clientHttp)
 
-	if !cepRules.IsCepValid(cep) {
-		WriteResponse(w, http.StatusUnprocessableEntity, "invalid zipcode")
-		return
-	}
-
 	var cepModel entity.ViaCep
 	err := cepRules.Exec(cep, &cepModel)
 
 	if err != nil {
-		WriteResponse(w, http.StatusNotFound, "can not find zipcode")
-		return
-	}
-
-	key := os.Getenv("WEATHER_API_KEY")
-
-	if key == "" {
-		WriteResponse(w, http.StatusInternalServerError, "weather api key not found")
+		WriteResponse(w, err.Code, err.Message)
 		return
 	}
 
 	weatherUseCase := rules.NewWeatherUseCase(clientHttp)
+	key := os.Getenv("WEATHER_API_KEY")
 
 	var dto dto.OutDto
 	errWeather := weatherUseCase.Exec(key, cepModel.City, &dto)
 
 	if errWeather != nil {
-		WriteResponse(w, http.StatusNotFound, "weather data not found")
+		WriteResponse(w, errWeather.Code, errWeather.Message)
 		return
 	}
 

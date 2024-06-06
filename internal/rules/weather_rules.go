@@ -20,13 +20,24 @@ func NewWeatherUseCase(h *http.Client) *Weather {
 	}
 }
 
-func (w *Weather) Exec(key string, city string, dto *dto.OutDto) error {
+func (w *Weather) Exec(key string, city string, dto *dto.OutDto) *entity.HttpError {
+
+	if key == "" {
+		return &entity.HttpError{
+			Code:    http.StatusInternalServerError,
+			Message: "weather api key not found",
+		}
+	}
+
 	weatherUrl := fmt.Sprintf("http://api.weatherapi.com/v1/current.json?key=%v&q=%q", key, util.StringPrepare(city))
 
 	resWeather, errWeather := w.http.Get(weatherUrl)
 
 	if errWeather != nil {
-		return errWeather
+		return &entity.HttpError{
+			Code:    resWeather.StatusCode,
+			Message: errWeather.Error(),
+		}
 	}
 
 	var weatherData entity.WeatherData

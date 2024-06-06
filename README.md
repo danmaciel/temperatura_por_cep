@@ -69,5 +69,5 @@ Em todos os casos, a porta utilizada é a 8080.
 Os testes unitários ficam no diretorio tests na raiz da aplicação sendo necessario alterar a linha os.Setenv("WEATHER_API_KEY_TEST", ""), com a usa API key e depois executá-los:
 
 ```
-go test * ./tests/
+go test ./tests/
 ```

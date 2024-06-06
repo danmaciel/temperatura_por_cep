@@ -14,7 +14,6 @@ import (
 
 func TestWeatherApi(t *testing.T) {
 
-	//os.Setenv("WEATHER_API_KEY", "SUA_API_KEY")
 	os.Setenv("WEATHER_API_KEY_TEST", "")
 
 	clientHttp := httpClient.NewHttpClient()

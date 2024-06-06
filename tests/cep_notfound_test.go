@@ -1,23 +1,23 @@
 package tests
 
 import (
+	"net/http"
 	"testing"
 
+	"github.com/danmaciel/temperatura_por_cep/internal/entity"
 	httpClient "github.com/danmaciel/temperatura_por_cep/internal/infra/http"
 	rules "github.com/danmaciel/temperatura_por_cep/internal/rules"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCepLenght(t *testing.T) {
+func TestCepNotFound(t *testing.T) {
 	clientHttp := httpClient.NewHttpClient()
 
 	cep := rules.NewCepRules(clientHttp)
 
-	r := cep.IsCepValid("1234567")
+	var c entity.ViaCep
+	r := cep.Exec("01153001", &c)
 
-	assert.False(t, r)
-
-	r = cep.IsCepValid("12345678")
-
-	assert.True(t, r)
+	assert.Equal(t, r.Code, http.StatusNotFound)
+	assert.Equal(t, r.Message, "can not find zipcode")
 }

@@ -19,21 +19,30 @@ func NewCepRules(h *http.Client) *Cep {
 	}
 }
 
-func (c *Cep) Exec(cep string, vc *entity.ViaCep) error {
+func (c *Cep) Exec(cep string, vc *entity.ViaCep) *entity.HttpError {
 	newCep := strings.ReplaceAll(cep, "-", "")
+
+	if !c.isCepValid(newCep) {
+		return &entity.HttpError{
+			Code:    http.StatusUnprocessableEntity,
+			Message: "invalid zipcode",
+		}
+	}
 
 	res, err := c.http.Get(fmt.Sprintf("https://viacep.com.br/ws/%v/json/", newCep))
 
-	if err != nil {
-		return err
-	}
-
 	json.NewDecoder(res.Body).Decode(&vc)
+
+	if err != nil || vc.City == "" {
+		return &entity.HttpError{
+			Code:    http.StatusNotFound,
+			Message: "can not find zipcode",
+		}
+	}
 
 	return nil
 }
 
-func (c *Cep) IsCepValid(cep string) bool {
-	newCep := strings.ReplaceAll(cep, "-", "")
-	return len(newCep) == 8
+func (c *Cep) isCepValid(cep string) bool {
+	return cep != "" && len(cep) == 8
 }
